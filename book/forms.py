@@ -23,7 +23,7 @@ class BooksForm(forms.ModelForm):
         if user_point is None:
             raise forms.ValidationError("Point is required.")
         
-        if user_point >= 0 and user_point <= 10:
+        if not (0 <= user_point <= 10):
             return user_point
         else:
             raise forms.ValidationError("point is between 0 to 10")

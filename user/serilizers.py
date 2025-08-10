@@ -32,8 +32,24 @@ class BookSerializer(serializers.ModelSerializer):
 
     def validate_user_point(self, value):
         if not (0 <= value <= 10):
-            raise serializers.ValidationError("user_point must be between 0 and 10.")
+            raise serializers.ValidationError("point must be between 0 and 10.")
         return value
+
+class AllBooksSerializer(serializers.ModelSerializer):
+    authur = serializers.SlugRelatedField(
+        queryset=Authur.objects.all(),
+        slug_field='name'
+    )
+    genre = serializers.SlugRelatedField(
+        many=True,
+        queryset=Genre.objects.all(),
+        slug_field='name'
+    )
+
+    class Meta:
+        model = Books
+        fields = ['id', 'owner', 'authur', 'genre', 'name', 'summery', 'user_point']
+        read_only_fields = ['id', 'owner', 'authur', 'genre', 'name', 'summery', 'user_point']
 
 class BookDetailSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, read_only=True)
