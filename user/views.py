@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Q
 from .models import *
 from .forms import *
 from .serilizers import *
@@ -6,15 +7,26 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status 
 from rest_framework.permissions import IsAuthenticated
+from drf_spectacular.utils import extend_schema
 
 # region DRF
 class AllUsersAPIView(APIView):
+    @extend_schema(
+        request=AllUsersList,
+        responses={201: AllUsersList},
+        description = "this api is for get all users list"
+    )
     def get(self, request):
         users = User.objects.filter(is_active=True)
         serializer = AllUsersList(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class UserDeatailAPIView(APIView):
+    @extend_schema(
+        request=UsersDetailSerializer,
+        responses={201: UsersDetailSerializer},
+        description = "this api is for get user detail"
+    )
     def get(self, request, username):
         user = get_object_or_404(User,username=username)
         serializer = UsersDetailSerializer(user)
@@ -22,6 +34,12 @@ class UserDeatailAPIView(APIView):
 
 class CreatBookAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    @extend_schema(
+        request=BookSerializer,
+        responses={201: BookSerializer},
+        description = "this api is for create new post"
+    )
+    
     def post(self, request):
         serializer = BookSerializer(data=request.data)
         user = request.user
@@ -31,6 +49,14 @@ class CreatBookAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class ManageBookAPIView(APIView):
+    permission_classes=[IsAuthenticated]
+    
+    @extend_schema(
+        request=BookSerializer,
+        responses={201: BookSerializer},
+        description = "this api is for update and delete posts"
+    )
+    
     def put(self, request, id):
         user = request.user
         book = get_object_or_404(Books, id=id)
@@ -53,25 +79,52 @@ class ManageBookAPIView(APIView):
             return Response({"message":"book was deleted"}, status=status.HTTP_404_NOT_FOUND)
 
 class AllbooksAPIView(APIView):
+    @extend_schema(
+        request=AllBooksSerializer,
+        responses={201: AllBooksSerializer},
+        description = "this api is for create new post"
+    )
     def get(self,request):
         books = Books.objects.all().order_by('-created')
         serializer = AllBooksSerializer(books, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class DetailBookAPIView(APIView):
+    @extend_schema(
+        request = AllBooksSerializer,
+        responses={201: AllBooksSerializer},
+        description = "this api is for get detail of book"
+    )
     def get(self, request, id):
         book = get_object_or_404(Books, id=id)
-        return Response(
-            {
-            "owner": str(book.owner),
-            "authur": str(book.authur),
-            "genre": [str(b.name) for b in book.genre.all()],
-            "name": book.name,
-            "summery": book.summery,
-            "user_point": book.user_point
-            }
-        )
+        serializer = AllBooksSerializer(book, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class SearchBookAPIView(APIView):
+    @extend_schema(
+        request=AllBooksSerializer,
+        responses={201: AllBooksSerializer},
+        description = "this api is for search in posts"
+    )
+    def get(self, request, query):
+        books = Books.objects.filter(Q(authur__name__icontains=query)|
+                                    Q(name__icontains=query)|
+                                    Q(summery__icontains=query))
+        serializer = AllBooksSerializer(books, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class FilterByGenreAPIView(APIView):
+    @extend_schema(
+        request=AllBooksSerializer,
+        responses={201: AllBooksSerializer},
+        description = "this api is for filter by genre"
+    )
+    def get(self, request, query):
+        books = Books.objects.filter(genre__name=query)
+        serializer = AllBooksSerializer(books, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
         
+
 # endregion
 
 # region viewbase

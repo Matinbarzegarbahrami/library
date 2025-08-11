@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "user.apps.UserConfig",
     "book.apps.BookConfig",
     "rest_framework",
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -126,3 +127,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 AUTH_USER_MODEL = 'user.User'
+
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'library API',
+    'DESCRIPTION': 'library for rating books',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
