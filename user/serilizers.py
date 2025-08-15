@@ -92,3 +92,14 @@ class AllUsersList(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'bio']
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    books = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'bio', 'books']
+
+    def get_books(self, user):
+        return BookDetailSerializer(user.book_owner.all(), many=True).data

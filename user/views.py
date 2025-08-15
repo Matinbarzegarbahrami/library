@@ -125,6 +125,18 @@ class FilterByGenreAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
         
 
+class ProfileAPIView(APIView):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response(
+                {"message": "please log in first"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        serializer = ProfileSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 # endregion
 
 # region viewbase

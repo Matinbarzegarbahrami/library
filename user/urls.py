@@ -13,4 +13,5 @@ urlpatterns = [
     path('search/<str:query>/', views.SearchBookAPIView.as_view(), name="search"),
     path('genre/<str:query>/', views.FilterByGenreAPIView.as_view(), name="genre"),
     path('view/all-users', views.all_users, name="all-users-view"),
+    path('profile/', views.ProfileAPIView.as_view(), name="profile")
 ]
