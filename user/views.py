@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status 
 from rest_framework.permissions import IsAuthenticated
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema,  OpenApiExample, OpenApiResponse   
 
 # region DRF
 class AllUsersAPIView(APIView):
@@ -126,6 +126,50 @@ class FilterByGenreAPIView(APIView):
         
 
 class ProfileAPIView(APIView):
+    @extend_schema(
+        description = "if user loged in, return user information",
+        responses={
+            200: OpenApiResponse(response=ProfileSerializer, description="user profile"),
+            401: OpenApiResponse(description="Need for authentication")
+        },
+        examples=[
+            OpenApiExample
+                (
+                "succses",
+                value=
+                    {
+                    "username": "username",
+                    "first_name": "name",
+                    "last_name": "last name",
+                    "bio":  "book lover",
+                    "books": 
+                        [
+                            {
+                                "id": 1,
+                                "owner": "username",
+                                "authur": 
+                                    {
+                                    "id": 1,
+                                    "name": "authur",
+                                    "slug": "authur"
+                                    },
+                                "genre": [
+                                    {
+                                        "id": 1,
+                                        "name": "action",
+                                        "slug": "action"
+                                    }
+                                ],
+                                "name": "book name",
+                                "summery": "story about book",
+                                "user_point": 10
+                            },
+                        ]
+                    },response_only=True
+                )
+        ],
+        tags=["Profile"]
+        )
     def get(self, request):
         if not request.user.is_authenticated:
             return Response(
@@ -136,6 +180,40 @@ class ProfileAPIView(APIView):
         serializer = ProfileSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+class EditProfileAPIView(APIView):
+    permission_classes=[IsAuthenticated]
+    def put(self, request):
+        user = request.user
+        serializer = EditProfileSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+        
+        
+class ChangeUsernameAPIView(APIView):
+    permission_classes=[IsAuthenticated]
+    def put(self, request):
+        user = request.user
+        serializer = EditusernameSeriaizer(user, data=request.data)
+
+        if serializer.is_valid():
+            new_username = serializer.validated_data.get("username")
+            if user.username == new_username:
+                return Response({"message":"The new and old usernames are the same."})
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+
+class ChangePasswordAPIView(APIView):
+    permission_classes=[IsAuthenticated]
+    def put(self, request):
+        user = request.user
+        serializer = EditusernameSeriaizer(user, data=request.data)
+        if serializer.is_valid():
+            user.set_password(serializer.validated_data.get("password"))
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # endregion
 

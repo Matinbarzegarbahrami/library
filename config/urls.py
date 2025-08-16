@@ -7,5 +7,6 @@ app_name = "config"
 urlpatterns = [
     path('login/', jwt_views.TokenObtainPairView.as_view(), name ='token_obtain_pair'),
     path('login/refresh/',jwt_views.TokenRefreshView.as_view(),name ='token_refresh'),
-    path('logout/', views.LogoutView.as_view(), name="logout")
+    path('logout/', views.LogoutView.as_view(), name="logout"),
+    path('signup/', views.SignupAPIView.as_view(), name="signup")
 ]

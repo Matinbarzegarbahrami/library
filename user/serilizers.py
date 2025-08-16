@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import User
 from book.models import Books, Genre, Authur
 from django.utils.text import slugify
+from django.shortcuts import get_object_or_404
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
@@ -103,3 +104,50 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_books(self, user):
         return BookDetailSerializer(user.book_owner.all(), many=True).data
+
+
+class SignupSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=100)
+    password = serializers.CharField(max_length=100)
+    password2 = serializers.CharField(max_length=100)
+    
+    def validate_username(self, username):
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError({"username": "username is already registerd"})
+    
+    def validate(self, data):
+        if data['password'] != data['password2']:
+            raise serializers.ValidationError({"password2": "Passwords do not match"})
+        return data
+
+    def create(self, validated_data):
+        user = User(username=validated_data['username'])
+        user.set_password(validated_data["password"])
+        user.save()
+        return user
+
+class EditProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["first_name","last_name","bio", "phone", "email"]
+    
+        
+
+class EditusernameSeriaizer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["username"]
+        
+    def validate_username(self, username):
+        if User.objects.filter(username=username).exists():
+            serializers.ValidationError("username already used")
+        return username
+
+class ChangePasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(max_length=100)
+    password2 = serializers.CharField(max_length=100)
+    
+    def validate(self, data):
+        if data['password'] != data["password2"]:
+            raise serializers.ValidationError({"password2": "Passwords do not match"})
+        return data
