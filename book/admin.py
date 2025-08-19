@@ -15,3 +15,7 @@ class AuthurAdmin(admin.ModelAdmin):
 @admin.register(Books)
 class BooksAdmin(admin.ModelAdmin):
     list_display = ['name']
+
+@admin.register(Report)
+class ReportAdmin(admin.ModelAdmin):
+    list_display = ['report_type']

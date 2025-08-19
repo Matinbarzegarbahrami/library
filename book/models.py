@@ -20,6 +20,19 @@ class Books(models.Model):
     summery = models.TextField()
     user_point = models.PositiveIntegerField()
     created = models.DateTimeField(auto_now_add=True)
+    
 
     def __str__(self):
         return self.name
+
+REPORT_TYPE=[
+    ('badword', 'bad words'),
+    ('sexual', 'sexual content'),
+    ('other', 'other')
+]
+
+class Report(models.Model):
+    book = models.ForeignKey(Books, related_name="book_report", on_delete=models.CASCADE)
+    report_type = models.CharField(choices=REPORT_TYPE, max_length=8) 
+    text = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
