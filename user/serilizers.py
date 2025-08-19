@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import User
-from book.models import Books, Genre, Authur
+from book.models import Books, Genre, Authur, Report
 from django.utils.text import slugify
 from django.shortcuts import get_object_or_404
 
@@ -81,6 +81,13 @@ class BookDetailSerializer(serializers.ModelSerializer):
         model = Books
         fields = ['id', 'owner', 'authur', 'genre', 'name', 'summery', 'user_point']
 
+
+class ReportSerializer(serializers.ModelSerializer):
+    book = serializers.PrimaryKeyRelatedField(queryset=Books.objects.all())
+    class Meta:
+        model = Report
+        fields= ["book", "report_type", "text", "date"]
+
 class UsersDetailSerializer(serializers.ModelSerializer):
     book_owner = BookDetailSerializer(many=True)
 
@@ -151,3 +158,5 @@ class ChangePasswordSerializer(serializers.Serializer):
         if data['password'] != data["password2"]:
             raise serializers.ValidationError({"password2": "Passwords do not match"})
         return data
+
+

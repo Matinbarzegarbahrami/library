@@ -41,3 +41,16 @@ class ReportListAPIView(APIView):
         report = Report.objects.all().order_by('-date')
         serializer = AllReportsSerializer(report, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class ReportDetailAPIView(APIView):
+    permission_classes = [IsAdminUser]
+    def get(self, request, id):
+        report = get_object_or_404(Report, id=id)
+        serializer = AllReportsSerializer(report, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, id):
+        report = get_object_or_404(Report, id=id)
+        report.delete()
+        return Response({"message":"report has deleted"}, status=status.HTTP_200_OK)
+

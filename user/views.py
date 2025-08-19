@@ -100,6 +100,18 @@ class DetailBookAPIView(APIView):
         serializer = AllBooksSerializer(book, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+class ReportAPIView(APIView):
+    def post(self, request, id):
+        book = get_object_or_404(Books, id=id)
+        data = request.data.copy()
+        data['book'] = book.id
+        serializer = ReportSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class SearchBookAPIView(APIView):
     @extend_schema(
         request=AllBooksSerializer,
